@@ -1,0 +1,135 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_URL")
+  extensions = [vector]
+}
+
+enum Role {
+  USER
+  PROVIDER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  name      String
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  provider      Provider?
+  bookings      Booking[]
+  itineraries   Itinerary[]
+  eventRequests EventRequest[]
+}
+
+model Provider {
+  id             String  @id @default(uuid())
+  userId         String  @unique
+  companyName    String
+  slug           String  @unique
+  commissionRate Float   @default(10.0)
+  status         String  @default("pending")
+  rib            String?
+  serviceType    String?
+
+  user        User         @relation(fields: [userId], references: [id])
+  services    Service[]
+  groupTrips  GroupTrip[]
+  commissions Commission[]
+}
+
+model Service {
+  id         String   @id @default(uuid())
+  providerId String
+  title      String
+  type       String
+  price      Float
+  currency   String   @default("MAD")
+  metadata   Json?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  provider Provider  @relation(fields: [providerId], references: [id])
+  bookings Booking[]
+}
+
+model Booking {
+  id             String        @id @default(uuid())
+  userId         String
+  serviceId      String
+  status         BookingStatus @default(PENDING)
+  amountPaid     Float
+  currency       String        @default("MAD")
+  stripeIntentId String?
+  bookedAt       DateTime      @default(now())
+
+  user        User         @relation(fields: [userId], references: [id])
+  service     Service      @relation(fields: [serviceId], references: [id])
+  commissions Commission[]
+}
+
+model Itinerary {
+  id          String   @id @default(uuid())
+  userId      String
+  title       String
+  daysJson    Json
+  aiGenerated Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model GroupTrip {
+  id              String   @id @default(uuid())
+  providerId      String
+  title           String
+  maxParticipants Int
+  departureAt     DateTime
+  pricePerPerson  Float
+  status          String   @default("open")
+
+  provider Provider @relation(fields: [providerId], references: [id])
+}
+
+model EventRequest {
+  id          String   @id @default(uuid())
+  userId      String
+  eventType   String
+  guestsCount Int
+  budgetRange String?
+  description String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Commission {
+  id         String @id @default(uuid())
+  providerId String
+  bookingId  String
+  amount     Float
+  rate       Float
+  period     String
+  paidStatus String @default("unpaid")
+
+  provider Provider @relation(fields: [providerId], references: [id])
+  booking  Booking  @relation(fields: [bookingId], references: [id])
+}
