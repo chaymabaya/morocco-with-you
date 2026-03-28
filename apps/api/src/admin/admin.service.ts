@@ -107,7 +107,7 @@ export class AdminService {
     type: string
     price: number
     currency?: string
-    metadata?: Prisma.InputJsonValue | Prisma.NullTypes.JsonNull
+    metadata?: any
     isActive?: boolean
   }) {
     return this.prisma.service.create({
@@ -130,7 +130,7 @@ export class AdminService {
       type?: string
       price?: number
       currency?: string
-      metadata?: Prisma.InputJsonValue | Prisma.NullTypes.JsonNull
+      metadata?: any
       isActive?: boolean
     },
   ) {
