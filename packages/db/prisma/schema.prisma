@@ -1,5 +1,8 @@
 generator client {
   provider        = "prisma-client-js"
+  // Generate the client in the monorepo root so that
+  // all apps (like apps/api) can resolve it correctly.
+  output          = "../../node_modules/.prisma/client"
   previewFeatures = ["postgresqlExtensions"]
 }
 
