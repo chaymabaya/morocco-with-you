@@ -2,11 +2,19 @@
   "name": "@mwy/db",
   "version": "0.0.1",
   "private": true,
-  "scripts": {
+
+
+   "scripts": {
+    "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "ts-node prisma/seed.ts"
   },
+  // "scripts": {
+  //   "db:generate": "prisma generate",
+  //   "db:migrate": "prisma migrate dev",
+  //   "db:seed": "ts-node prisma/seed.ts"
+  // }
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
   },
